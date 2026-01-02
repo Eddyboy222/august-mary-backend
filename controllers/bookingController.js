@@ -5,13 +5,20 @@ export const createBooking = async (req, res) => {
   try {
     const booking = await Booking.create(req.body);
 
-    // 🔥 Send email to admin
-    await sendBookingEmail(booking);
+    // 🔹 Send email WITHOUT blocking booking
+    try {
+      await transporter.sendMail({
+        from: `"New Booking" <${process.env.EMAIL_USER}>`,
+        to: process.env.EMAIL_USER,
+        subject: "New Booking",
+        html: `<p>New booking from ${booking.fullName}</p>`,
+      });
+    } catch (emailError) {
+      console.error("Email failed:", emailError.message);
+    }
 
-    res.status(201).json({
-      message: "Booking created successfully",
-      booking,
-    });
+    // ✅ ALWAYS return success if booking saved
+    res.status(201).json(booking);
   } catch (error) {
     res.status(500).json({
       message: "Error creating booking",
@@ -19,6 +26,7 @@ export const createBooking = async (req, res) => {
     });
   }
 };
+
 
 export const getBookings = async (req, res) => {
   try {
