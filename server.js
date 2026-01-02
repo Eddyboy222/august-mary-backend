@@ -18,7 +18,17 @@ const app = express();
 
 // MIDDLEWARES (must come before routes)
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://august-mary-booking-website.vercel.app"
+    ],
+    methods: ["GET", "POST", "DELETE"],
+    credentials: true,
+  })
+);
+
 app.use(helmet());
 app.use(morgan("dev"));
 
