@@ -5,21 +5,27 @@ export const sendContactMessage = async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    // Basic validation
+    // Validation
     if (!name || !email || !message) {
       return res.status(400).json({
         message: "All fields are required",
       });
     }
 
-    // Save to database
+    // Save to DB
     const newMessage = await ContactMessage.create({
       name,
       email,
       message,
     });
 
-    // Email transporter (same Gmail setup you already use)
+    // ✅ RESPOND IMMEDIATELY (NO TIMEOUT)
+    res.status(201).json({
+      message: "Message received successfully",
+      data: newMessage,
+    });
+
+    // ⬇️ EMAIL SENT IN BACKGROUND
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -28,8 +34,7 @@ export const sendContactMessage = async (req, res) => {
       },
     });
 
-    // Email content
-    await transporter.sendMail({
+    transporter.sendMail({
       from: `"Website Contact" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       subject: "New Contact Message",
@@ -40,16 +45,13 @@ export const sendContactMessage = async (req, res) => {
         <p><strong>Message:</strong></p>
         <p>${message}</p>
       `,
+    })
+    .catch(err => {
+      console.error("Email failed:", err.message);
     });
 
-    res.status(201).json({
-      message: "Message sent successfully",
-      data: newMessage,
-    });
   } catch (error) {
-    res.status(500).json({
-      message: "Failed to send message",
-      error: error.message,
-    });
+    console.error("Contact error:", error.message);
+    // ❌ Do NOT send another response here
   }
 };
