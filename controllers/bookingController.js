@@ -1,6 +1,35 @@
 import { sendBookingEmail } from "../utils/sendEmail.js";
 import { Booking } from "../models/booking.js";
 
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  connectionTimeout: 10000,
+});
+
+await transporter.sendMail({
+  from: `"New Booking" <${process.env.EMAIL_USER}>`,
+  to: process.env.EMAIL_USER,
+  subject: "New Booking Appointment",
+  html: `
+    <h3>New Booking</h3>
+    <p><strong>Name:</strong> ${booking.fullName}</p>
+    <p><strong>Email:</strong> ${booking.email}</p>
+    <p><strong>Date:</strong> ${booking.date}</p>
+    <p><strong>Service:</strong> ${booking.service}</p>
+    <p><strong>Description:</strong> ${booking.description}</p>
+  `,
+});
+
+
+
 export const createBooking = async (req, res) => {
   try {
     const booking = await Booking.create(req.body);
