@@ -50,6 +50,10 @@ app.get("/", (req, res) => {
   res.send("Backend running...");
 });
 
+app.get("/ping", (req, res) => {
+  res.send("server is alive");
+})
+
 // Start server
 app.listen(process.env.PORT || 5000, () => {
   console.log("Server running on port " + process.env.PORT);
