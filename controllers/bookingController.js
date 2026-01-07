@@ -3,9 +3,21 @@ import { sendBookingEmail } from "../utils/sendEmail.js";
 
 export const createBooking = async (req, res) => {
   try {
+    const { selectedDay } = req.body;
+
+    // ✅ ENFORCE MAX 2 BOOKINGS PER DAY
+    const existingCount = await Booking.countDocuments({ selectedDay });
+
+    if (existingCount >= 2) {
+      return res.status(400).json({
+        message: "This date is fully booked",
+      });
+    }
+
+    // ✅ CREATE BOOKING
     const booking = await Booking.create(req.body);
 
-    // 🔔 Send email (NON-BLOCKING)
+    // 🔔 SEND EMAIL (NON-BLOCKING)
     sendBookingEmail(booking).catch((err) => {
       console.error("📧 Booking email failed:", err.message);
     });
