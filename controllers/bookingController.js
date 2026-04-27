@@ -8,7 +8,7 @@ export const createBooking = async (req, res) => {
     // ✅ ENFORCE MAX 2 BOOKINGS PER DAY
     const existingCount = await Booking.countDocuments({ selectedDay });
 
-    if (existingCount >= 2) {
+    if (existingCount >= 3) {
       return res.status(400).json({
         message: "This date is fully booked",
       });
